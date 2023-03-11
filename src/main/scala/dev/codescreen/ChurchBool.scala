@@ -1,6 +1,6 @@
 package dev.codescreen
 
-import dev.codescreen.ChurchBool.True
+import dev.codescreen.ChurchBool._
 
 /**
  * This is a fundamental example of polymorphism usage
@@ -16,15 +16,25 @@ trait ChurchBool {
 
   def or(that: => ChurchBool): ChurchBool = cond(True, that)
 
-  def and(that: => ChurchBool): ChurchBool = ???
+  def and(that: => ChurchBool): ChurchBool =
+    cond(that, False)
 
-  def not: ChurchBool = ???
+  def not: ChurchBool =
+    new ChurchBool {
+      override def cond[A](ifTrue: => A, ifFalse: => A): A =
+        self.cond(ifFalse, ifTrue)
+    }
 
-  def toBool: Boolean = ???
+  def toBool: Boolean =
+    cond(true, false)
 }
 
 object ChurchBool {
-  def fromBool(b: => Boolean): ChurchBool = ???
+  def fromBool(b: => Boolean): ChurchBool =
+    new ChurchBool {
+      override def cond[A](ifTrue: => A, ifFalse: => A): A =
+        if (b) ifTrue else ifFalse
+    }
 
   object True extends ChurchBool {
     override def cond[A](ifTrue: => A, ifFalse: => A): A = ifTrue
